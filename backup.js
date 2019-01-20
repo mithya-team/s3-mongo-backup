@@ -196,7 +196,15 @@ function UploadFileToS3(S3, ZIP_NAME, config) {
             Key: `${config.folderName || "default"}/${config.mongodb.database}/${ZIP_NAME}`,
             Body: fileStream
         };
-
+        if (config.expiryDays) {
+            uploadParams.LifecycleConfiguration = {
+                Rules: {
+                    Expiration: {
+                        Days: config.expiryDays
+                    }
+                }
+            }
+        }
         S3.upload(uploadParams, (err, data) => {
             if (err) {
                 return reject({
