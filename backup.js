@@ -8,9 +8,9 @@ const path = require('path'),
     AWS = require('aws-sdk'),
     MongodbURI = require('mongodb-uri'),
     PROJECT_ROOT = process
-    .mainModule
-    .paths[0]
-    .split("node_modules")[0];
+        .mainModule
+        .paths[0]
+        .split("node_modules")[0];
 
 let BACKUP_PATH = (ZIP_NAME) => path.resolve(os.tmpdir(), ZIP_NAME);
 
@@ -193,7 +193,7 @@ function UploadFileToS3(S3, ZIP_NAME, config) {
 
         let uploadParams = {
             Bucket: config.s3.bucketName,
-            Key: `mongoDbBackups/${ZIP_NAME}`,
+            Key: `${config.folderName || "default"}/${config.mongodb.database}/${ZIP_NAME}`,
             Body: fileStream
         };
 
