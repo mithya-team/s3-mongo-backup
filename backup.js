@@ -17,7 +17,7 @@ let BACKUP_PATH = (ZIP_NAME) => path.resolve(os.tmpdir(), ZIP_NAME);
 // Checks provided Configuration, Rejects if important keys from config are
 // missing
 function ValidateConfig(config) {
-    if (config && config.mongodb && config.s3 && config.s3.accessKey && config.s3.secretKey && config.s3.region && config.s3.bucketName) {
+    if (config && config.mongodb && config.s3 && config.s3.accessKey && config.s3.secretKey && config.s3.bucketName) {
         let mongodb;
         if (typeof config.mongodb == "string") {
             mongodb = MongodbURI.parse(config.mongodb);
@@ -61,8 +61,7 @@ function AWSSetup(config) {
         .config
         .update({
             accessKeyId: config.s3.accessKey,
-            secretAccessKey: config.s3.secretKey,
-            region: config.s3.region
+            secretAccessKey: config.s3.secretKey
         });
 
     return new AWS.S3();
@@ -152,16 +151,12 @@ function DeleteLocalBackup(ZIP_NAME) {
 function CreateBucket(S3, config) {
 
     const bucketName = config.s3.bucketName,
-        accessPerm = config.s3.accessPerm,
-        region = config.s3.region;
+        accessPerm = config.s3.accessPerm;
 
     return new Promise((resolve, reject) => {
         S3.createBucket({
             Bucket: bucketName,
-            ACL: accessPerm || "private",
-            CreateBucketConfiguration: {
-                LocationConstraint: region
-            }
+            ACL: accessPerm || "private"
         }, (err, data) => {
             if (err) {
                 reject({
