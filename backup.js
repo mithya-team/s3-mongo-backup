@@ -191,10 +191,10 @@ function UploadFileToS3(S3, ZIP_NAME, config) {
             Body: fileStream
         };
         if(config.folder){
-            uploadParams.key = config.folder + '/' + config.mongodb.database + '/' + ZIP_NAME;
+            uploadParams.Key = config.folder + '/' + config.mongodb.database + '/' + ZIP_NAME;
         }
         else{
-            uploadParams.key = config.mongodb.database + '/' + ZIP_NAME;
+            uploadParams.Key = config.mongodb.database + '/' + ZIP_NAME;
         }
         if (config.expiryDays) {
             uploadParams.LifecycleConfiguration = {
