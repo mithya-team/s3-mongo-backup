@@ -188,9 +188,14 @@ function UploadFileToS3(S3, ZIP_NAME, config) {
 
         let uploadParams = {
             Bucket: config.s3.bucketName,
-            Key: `${config.folderName || "default"}/${config.mongodb.database}/${ZIP_NAME}`,
             Body: fileStream
         };
+        if(config.folder){
+            uploadParams.key = config.folder + '/' + config.mongodb.database + '/' + ZIP_NAME;
+        }
+        else{
+            uploadParams.key = config.mongodb.database + '/' + ZIP_NAME;
+        }
         if (config.expiryDays) {
             uploadParams.LifecycleConfiguration = {
                 Rules: {
