@@ -91,7 +91,7 @@ function BackupMongoDatabase(config) {
     return new Promise((resolve, reject) => {
 
         const database = config.mongodb.database,
-            excludeCollection = config.mongodb.excludeCollection,
+            excludeCollection = config.mongodb.excludeCollection || config.excludeCollection,
             password = config.mongodb.password || null,
             username = config.mongodb.username || null,
             timezoneOffset = config.timezoneOffset || null,
