@@ -91,6 +91,7 @@ function BackupMongoDatabase(config) {
     return new Promise((resolve, reject) => {
 
         const database = config.mongodb.database,
+            excludeCollection = config.mongodb.excludeCollection,
             password = config.mongodb.password || null,
             username = config.mongodb.username || null,
             timezoneOffset = config.timezoneOffset || null,
@@ -111,6 +112,12 @@ function BackupMongoDatabase(config) {
             command = `mongodump -h ${host} --port=${port} -d ${database} -u ${username} --quiet --gzip --archive=${BACKUP_PATH(DB_BACKUP_NAME)}`;
         }
 
+        if (excludeCollection){
+            if(!Array.isArray(excludeCollection)){
+                excludeCollection = [excludeCollection];
+            }
+            command += excludeCollection.join(` --excludeCollection `);
+        }
         exec(command, (err, stdout, stderr) => {
             if (err) {
                 // Most likely, mongodump isn't installed or isn't accessible
