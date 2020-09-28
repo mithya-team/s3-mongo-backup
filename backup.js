@@ -116,7 +116,7 @@ function BackupMongoDatabase(config) {
             if(!Array.isArray(excludeCollection)){
                 excludeCollection = [excludeCollection];
             }
-            command += excludeCollection.join(` --excludeCollection `);
+            command += ` --excludeCollection ` + excludeCollection.join(` --excludeCollection `);
         }
         exec(command, (err, stdout, stderr) => {
             if (err) {
