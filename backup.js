@@ -49,7 +49,6 @@ function ValidateConfig(config) {
 
         // Replace Connection URI with parsed output from mongodb-uri
         config.mongodb = mongodb;
-        console.log(config.mongodb);
         return true;
     }
     return false;
@@ -90,8 +89,9 @@ function BackupMongoDatabase(config) {
 
     return new Promise((resolve, reject) => {
 
-        const database = config.mongodb.database,
+        let database = config.mongodb.database,
             excludeCollection = config.mongodb.excludeCollection || config.excludeCollection,
+            includeCollection = config.mongodb.includeCollection || config.includeCollection,
             password = config.mongodb.password || null,
             username = config.mongodb.username || null,
             timezoneOffset = config.timezoneOffset || null,
@@ -112,13 +112,19 @@ function BackupMongoDatabase(config) {
             command = `mongodump -h ${host} --port=${port} -d ${database} -u ${username} --quiet --gzip --archive=${BACKUP_PATH(DB_BACKUP_NAME)}`;
         }
 
-        if (excludeCollection){
-            if(!Array.isArray(excludeCollection)){
+        if (excludeCollection) {
+            if (!Array.isArray(excludeCollection)) {
                 excludeCollection = [excludeCollection];
             }
             command += ` --excludeCollection ` + excludeCollection.join(` --excludeCollection `);
         }
-        exec(command, (err, stdout, stderr) => {
+        if (includeCollection) {
+            if (!Array.isArray(includeCollection)) {
+                includeCollection = [includeCollection];
+            }
+            command += ` --collection ` + includeCollection.join(` --collection `);
+        }
+        exec(command, (err) => {
             if (err) {
                 // Most likely, mongodump isn't installed or isn't accessible
                 reject({
@@ -197,10 +203,10 @@ function UploadFileToS3(S3, ZIP_NAME, config) {
             Bucket: config.s3.bucketName,
             Body: fileStream
         };
-        if(config.folder){
+        if (config.folder) {
             uploadParams.Key = config.folder + '/' + ZIP_NAME;
         }
-        else{
+        else {
             uploadParams.Key = ZIP_NAME;
         }
         if (config.expiryDays) {
@@ -210,7 +216,7 @@ function UploadFileToS3(S3, ZIP_NAME, config) {
                         Days: config.expiryDays
                     }
                 }
-            }
+            };
         }
         S3.upload(uploadParams, (err, data) => {
             if (err) {
@@ -223,7 +229,7 @@ function UploadFileToS3(S3, ZIP_NAME, config) {
 
             if (!config.keepLocalBackups) {
                 //  Not supposed to keep local backups, so delete the one that was just uploaded
-                DeleteLocalBackup(ZIP_NAME).then(deleteLocalBackupResult => {
+                DeleteLocalBackup(ZIP_NAME).then(() => {
                     resolve({
                         error: 0,
                         message: "Upload Successful, Deleted Local Copy of Backup",
@@ -274,7 +280,7 @@ function UploadBackup(config, backupResult) {
     }, uploadFileError => {
         if (uploadFileError.code === "NoSuchBucket") {
             // Bucket Does not exists, So Create one, And Reattempt to Upload
-            return CreateBucket(s3, config).then(createBucketResolved => {
+            return CreateBucket(s3, config).then(() => {
                 return UploadFileToS3(s3, backupResult.zipName, config).then(uploadFileResult => {
                     return Promise.resolve(uploadFileResult);
                 }, uploadFileError => {
