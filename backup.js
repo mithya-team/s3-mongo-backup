@@ -98,7 +98,12 @@ function BackupMongoDatabase(config) {
             host = config.mongodb.hosts[0].host || null,
             port = config.mongodb.hosts[0].port || null;
 
-        let DB_BACKUP_NAME = `${database}_${currentTime(timezoneOffset)}.gz`;
+        let DB_BACKUP_NAME;
+        if (config.fileName) {
+            DB_BACKUP_NAME = `${config.fileName}_${currentTime(timezoneOffset)}.gz`;
+        } else {
+            DB_BACKUP_NAME = `${database}_${currentTime(timezoneOffset)}.gz`;
+        }
 
         // Default command, does not considers username or password
         let command = `mongodump -h ${host} --port=${port} -d ${database} --quiet --gzip --archive=${BACKUP_PATH(DB_BACKUP_NAME)}`;
